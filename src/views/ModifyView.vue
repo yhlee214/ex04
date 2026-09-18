@@ -32,7 +32,7 @@
                     <div class="d-flex justify-content-center gap-3">
                         <button @click="goToList()" type="reset" class="btn btn-light px-4">취소</button>
                         <button @click="requestGagsModify()" class="btn btn-primary px-4">
-                            <span class="indicator-label">등록</span>
+                            <span class="indicator-label">수정</span>
                         </button>
                     </div>
                     <!--end::Actions-->
@@ -46,53 +46,53 @@
 </template>
 
 <script setup>
-    import { ref, onMounted } from 'vue'
-    import { useRouter, useRoute } from 'vue-router'
-    import axios from 'axios'
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import axios from 'axios'
 
-    const router = useRouter() // 라우터 인스턴스(객체) 반환
-    const route = useRoute() // 현재 경로 위치를 반환
+const router = useRouter() // 라우터 인스턴스(객체) 반환
+const route = useRoute() // 현재 경로 위치를 반환
 
-    const questionInput = ref('')
-    const answerInput = ref('')
-    
-    const selected = ref(null)
+const questionInput = ref('')
+const answerInput = ref('')
 
-    onMounted(() => {
-        console.log(`ModifyView::onMounted 호출됨`)
+const selected = ref(null)
 
-        selected.value = route.query
-        questionInput.value = route.query.question
-        answerInput.value = route.query.answer
-    
-    })
+onMounted(() => {
+    console.log(`ModifyView::onMounted 호출됨`)
 
-    function goToList() {
-        router.push({ path: '/list'})
-    }
+    selected.value = route.query
+    questionInput.value = route.query.question
+    answerInput.value = route.query.answer
 
-    async function requestGagsModify() {
-       try {
-  // 웹서버로 요청하기 (GET 방식으로 /api/snack 요청경로로 요청하기)
-  const response = await axios({
-    method: 'put',
-    baseURL: 'http://localhost:7901',
-    url: `/api/gags/${selected.value.id}`,
-    data: {
-        question: questionInput.value,
-        answer: answerInput.value
-    },
-    timeout : 5000,
-    responseType: 'json'
-  })
+})
 
-  goToList()
-
-console.log(`PUT /api/snack 에 대한 응답 -> ${JSON.stringify(response.data)}`)
-
-} catch(err) {
-  console.error(`에러 -> ${err}`)
+function goToList() {
+    router.push({ path: '/list' })
 }
+
+async function requestGagsModify() {
+    try {
+        // 웹서버로 요청하기 (GET 방식으로 /api/snack 요청경로로 요청하기)
+        const response = await axios({
+            method: 'put',
+            baseURL: 'http://localhost:7901',
+            url: `/api/gags/${selected.value.id}`,
+            data: {
+                question: questionInput.value,
+                answer: answerInput.value
+            },
+            timeout: 5000,
+            responseType: 'json'
+        })
+
+        goToList()
+
+        console.log(`PUT /api/snack 에 대한 응답 -> ${JSON.stringify(response.data)}`)
+
+    } catch (err) {
+        console.error(`에러 -> ${err}`)
+    }
 
 }
 
