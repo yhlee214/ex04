@@ -28,8 +28,8 @@
 					<thead>
 						<tr class="fs-7 fw-bold text-gray-500 border-bottom-0">
 							<th class="p-0 pb-3 min-w-100px text-start">글번호</th>
-							<th class="p-0 pb-3 min-w-300px text-center">제목</th>
-							<th class="p-0 pb-3 min-w-150px text-center">내용</th>
+							<th class="p-0 pb-3 min-w-300px text-center">질문</th>
+							<th class="p-0 pb-3 min-w-150px text-center">답</th>
 							<th class="p-0 pb-3 min-w-120px text-end">시간</th>
 							<th class="p-0 pb-3 min-w-120px text-end">관리</th>
 						</tr>
@@ -55,10 +55,11 @@
 								<span class="text-gray-600 fw-bold fs-6">{{ item.question }}</span>
 							</td>
 							<td class="text-center p-0">
-								<span class="badge badge-light-success fs-base">
+								<span class="badge badge-light-success fs-base"
+								 style="cursor: pointer;"
+								 @click="toggleAnswer(item.id)">
 									<i class="ki-duotone ki-arrow-up fs-5 text-success ms-n1">
-
-									</i>{{ item.answer }}
+									</i>{{ showAnswer(item.id) ? item.answer : '?' }}
 								</span>
 							</td>
 							<td class="text-end">
@@ -138,6 +139,25 @@ import { useRouter } from 'vue-router'
 // ref 값을 넣어서 값이 바뀌면 그걸 쓰고 있는 화면이 자동으로 다시 그려지게 됨.
 const gags = ref([]);
 const router = useRouter()
+
+
+const showIds = ref()
+
+function toggleAnswer(id) {
+	if (showIds.value.has(id)) {
+		showIds.value.delete(id)
+	} else {
+		showIds.value.add(id)
+	}
+	
+	showIds.value = new Set(showIds.value)
+}
+
+function showAnswer(id) {
+	return showIds.value.has(id)
+}
+
+
 
 // --- 클라이언트단 페이지네이션 상태 ---
 // 서버는 /api/gags 로 전체 목록을 한 번에 내려주므로, 여기서는 받아온 배열을
