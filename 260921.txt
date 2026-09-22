@@ -20,6 +20,9 @@
 		<!--begin::Body-->
 		<div class="card-body pt-6">
 
+			<!--begin::Loading-->
+
+
 			<!--begin::Table container-->
 			<div class="table-responsive">
 				<!--begin::Table-->
@@ -37,12 +40,7 @@
 					<!--end::Table head-->
 					<!--begin::Table body-->
 					<tbody>
-						<tr v-if="gags.length === 0">
-							<td colspan="5" class="text-center text-gray-500 py-8">
-								등록된 개그가 없습니다.
-							</td>
-						</tr>
-						<tr v-for="item in pagedGags" :key="item.id">
+						<tr v-for="(item, index) in gags" :key="item.id">
 							<td>
 								<div class="d-flex align-items-center">
 									<div class="d-flex justify-content-start flex-column">
@@ -66,7 +64,7 @@
 							</td>
 							<td class="text-end">
 								<button type="button" class="btn btn-sm btn-light-primary me-2"
-									@click="showModifyGagsPage(item)">
+									@click="showModifyGagsPage(index, itemId)(index, item.id)">
 									수정
 								</button>
 								<button type="button" class="btn btn-sm btn-light-danger"
@@ -80,47 +78,6 @@
 				</table>
 			</div>
 			<!--end::Table-->
-
-			<!--begin::Pagination-->
-			<footer v-if="gags.length > 0" class="list-footer">
-				<div class="result-count" aria-live="polite">
-					<strong>{{ firstItem }}–{{ lastItem }}</strong> / {{ gags.length }}개
-				</div>
-
-				<nav class="pagination" aria-label="페이지 이동">
-					<button aria-label="첫 페이지" :disabled="currentPage === 1" @click="goToPage(1)">
-						«
-					</button>
-					<button aria-label="이전 페이지" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">
-						‹
-					</button>
-					<button v-for="number in visiblePages" :key="number" type="button"
-						:class="{ active: number === currentPage }"
-						:aria-current="number === currentPage ? 'page' : undefined"
-						:aria-label="`${number} 페이지`" @click="goToPage(number)">
-						{{ number }}
-					</button>
-					<button aria-label="다음 페이지" :disabled="currentPage >= displayTotalPages"
-						@click="goToPage(currentPage + 1)">
-						›
-					</button>
-					<button aria-label="마지막 페이지" :disabled="currentPage >= displayTotalPages"
-						@click="goToPage(displayTotalPages)">
-						»
-					</button>
-				</nav>
-
-				<label class="page-size">
-					표시 개수
-					<select :value="pageSize" aria-label="페이지 크기" @change="changePageSize">
-						<option :value="10">10개</option>
-						<option :value="20">20개</option>
-						<option :value="50">50개</option>
-					</select>
-				</label>
-			</footer>
-			<!--end::Pagination-->
-
 		</div>
 		<!--end: Card Body-->
 
@@ -131,71 +88,22 @@
 
 <script setup>
 
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router'
 
-// ref 값을 넣어서 값이 바뀌면 그걸 쓰고 있는 화면이 자동으로 다시 그려지게 됨.
 const gags = ref([]);
 const router = useRouter()
-
-// --- 클라이언트단 페이지네이션 상태 ---
-// 서버는 /api/gags 로 전체 목록을 한 번에 내려주므로, 여기서는 받아온 배열을
-// 화면에서만 나눠 보여준다. 서버 요청은 페이지가 바뀌어도 다시 보내지 않는다.
-const currentPage = ref(1);
-const pageSize = ref(10);
-
-// computed 자동으로 다시 계산되는 값
-const totalPages = computed(() => Math.ceil(gags.value.length / pageSize.value));
-// 결과가 0건이어도 페이지 번호 표시는 최소 1페이지로 보여준다.
-const displayTotalPages = computed(() => Math.max(1, totalPages.value));
-
-const pagedGags = computed(() => {
-	const start = (currentPage.value - 1) * pageSize.value;
-	return gags.value.slice(start, start + pageSize.value);
-});
-
-const firstItem = computed(() =>
-	gags.value.length ? (currentPage.value - 1) * pageSize.value + 1 : 0,
-);
-const lastItem = computed(() =>
-	Math.min(currentPage.value * pageSize.value, gags.value.length),
-);
-
-// 현재 페이지 주변 버튼을 최대 5개까지만 보여준다.
-const visiblePages = computed(() => {
-	const count = Math.min(5, displayTotalPages.value);
-	const start = Math.max(1, Math.min(currentPage.value - 2, displayTotalPages.value - count + 1));
-	return Array.from({ length: count }, (_, index) => start + index);
-});
-
-function goToPage(page) {
-	const target = Math.min(Math.max(1, page), displayTotalPages.value);
-	currentPage.value = target;
-}
-
-function changePageSize(event) {
-	pageSize.value = Number(event.target.value);
-	currentPage.value = 1;
-}
-
-// 삭제 등으로 목록이 줄어들어 현재 페이지가 더 이상 존재하지 않으면
-// (예: 마지막 페이지의 마지막 한 줄을 삭제한 경우) 마지막 유효 페이지로 되돌린다.
-watch(displayTotalPages, (newTotalPages) => {
-	if (currentPage.value > newTotalPages) {
-		currentPage.value = newTotalPages;
-	}
-});
 
 function goToAdd() {
 	router.push({ path: '/add' })
 }
 
-function showModifyGagsPage(item) {
-	console.log(`showModifyGagsPage 호출됨 -> ${item.id}`)
-	console.log(`선택된 개그 -> ${JSON.stringify(item)}`)
+function showModifyGagsPage(index, itemId) {
+	console.log(`showModifySnackPage 호출됨 ->${index} ${itemId}`)
+	console.log(`선택된 스낵 -> ${JSON.stringify(gags.value[index])}`)
 
-	goToModifyGagsPage(item)
+	goToModifyGagsPage(gags.value[index])
 }
 
 function goToModifyGagsPage(selectedItem) {
@@ -397,71 +305,5 @@ async function requestGagRemove(id) {
 
 .text-danger {
 	color: #f1416c;
-}
-
-/* --- 페이지네이션 --- */
-.list-footer {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	justify-content: space-between;
-	gap: 12px;
-	margin-top: 16px;
-	padding-top: 16px;
-	border-top: 1px solid #eee;
-}
-
-.result-count {
-	font-size: 0.85rem;
-	color: #7e8299;
-}
-
-.pagination {
-	display: flex;
-	gap: 4px;
-}
-
-.pagination button {
-	min-width: 32px;
-	height: 32px;
-	border: 1px solid #e4e6ef;
-	background-color: #fff;
-	border-radius: 6px;
-	font-weight: 600;
-	font-size: 0.85rem;
-	color: #5e6278;
-	cursor: pointer;
-	transition: background-color 0.15s ease;
-}
-
-.pagination button:hover:not(:disabled) {
-	background-color: #f4f4f4;
-}
-
-.pagination button:disabled {
-	opacity: 0.4;
-	cursor: not-allowed;
-}
-
-.pagination button.active {
-	background-color: #3699ff;
-	border-color: #3699ff;
-	color: #fff;
-}
-
-.page-size {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	font-size: 0.85rem;
-	color: #7e8299;
-}
-
-.page-size select {
-	padding: 6px 8px;
-	border: 1px solid #e4e6ef;
-	border-radius: 6px;
-	font-size: 0.85rem;
-	background-color: #fff;
 }
 </style>

@@ -12,8 +12,8 @@
                     <!--begin::Form-->
 
                     <!--begin::Input group (문제)-->
-                    <div class="fv-row mb-4">
-                        <label class="fs-6 fw-semibold form-label mb-2">
+                    <div class="fv-row mb-6">
+                        <label class="fs-6 fw-semibold form-label">
                             <span class="required">문제</span>
                         </label>
                         <textarea v-model="questionInput" class="form-control form-control-solid" rows="3"></textarea>
@@ -80,7 +80,7 @@ async function requestGagsSave() {
 
         goToList()
 
-        console.log(`/api/snack 에 대한 응답 -> ${JSON.stringify(response.data)}`)
+        console.log(`/api/gags 에 대한 응답 -> ${JSON.stringify(response.data)}`)
 
     } catch (err) {
         console.error(`에러 -> ${err}`)
